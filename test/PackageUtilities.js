@@ -302,7 +302,7 @@ describe("PackageUtilities", () => {
     let packages;
     let packageGraph;
 
-    // for reference: 1->2, 1->3, 1->4, 2->4, 2->5, 3->4, 3->6, 4->1, 4->4,  5->4, 6->4, 7->4
+    // for reference: 1->2, 1->3, 1->4, 2->4, 2->5, 3->4, 3->6, 4->1, 4->4, 5->4, 6->4, 7->4
     // We design the package tree in a very specific way. We want to test several different things
     // * A package depending on itself isn't added twice (package 4)
     // * A package being added twice in the same stage of the expansion isn't added twice (package 4)
@@ -325,6 +325,26 @@ describe("PackageUtilities", () => {
       expect(packagesWithDeps.some((pkg) => pkg.name === "package-4")).toBe(true);
       expect(packagesWithDeps.some((pkg) => pkg.name === "package-5")).toBe(true);
       expect(packagesWithDeps.some((pkg) => pkg.name === "package-6")).toBe(true);
+    });
+  });
+
+  describe(".addDependents()", () => {
+    let packages;
+    let packageGraph;
+
+    beforeAll(() => initFixture("PackageUtilities/dependents").then((testDir) => {
+      packages = PackageUtilities.getPackages(new Repository(testDir));
+      packageGraph = PackageUtilities.getPackageGraph(packages);
+    }));
+
+    it("should add all transitive dependents of passed in packages with no repeats", () => {
+      const expected = ["package-1", "package-2", "package-3", "package-4", "package-5", "package-6"];
+      const entry = packages.filter((pkg) => pkg.name === "package-1");
+      const dependents = PackageUtilities.addDependents(entry, packageGraph);
+      const names = dependents.map(d => d.name);
+
+      expect(names).toEqual(expect.arrayContaining(expected));
+      expect(names).not.toContain("package-7");
     });
   });
 });

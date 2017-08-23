@@ -1,0 +1,8 @@
+{
+  "name": "package-1",
+  "description": "Test entry point, used by package-2, package-3, package-4",
+  "version": "1.0.0",
+  "dependencies": {
+    "package-7": "1.0.0"
+  }
+}

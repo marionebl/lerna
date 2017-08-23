@@ -127,6 +127,43 @@ export default class PackageUtilities {
   }
 
   /**
+  * Takes a list of Packages and adds depending packages.
+  * i.e if packageA depended on packageB
+  * `PackageUtilities.addDependents([packageB], this.packageGraph)`
+  * would return [packageB, packageA]
+  * @param {!Array.<Package>} packages The packages to include dependencies for.
+  * @param {!<PackageGraph>} packageGraph The package graph for the whole repository.
+  * @return {Array.<Package>} The packages with any dependencies that were't already included.
+  */
+  static addDependents(packages, packageGraph) {
+    const mem = [];
+
+    const depends = (a, b) => a.dependencies.includes(b.name);
+    const visited = (pkg) => {
+      if (mem.includes(pkg)) {
+        return true;
+      }
+      mem.push(pkg);
+      return false;
+    }
+
+    const expand = (pkgs) => pkgs.reduce((expanded, pkg) => {
+      const dependents = packageGraph.nodes
+        .filter(node => depends(node, pkg) && !visited(node.package))
+        .map(node => node.package);
+
+      if (!expanded.some(e => e.name === pkg.name)) {
+        expanded.push(pkg);
+      }
+
+      Array.prototype.push.apply(expanded, expand(dependents));
+      return expanded;
+    }, pkgs.filter(p => !visited(p)));
+
+    return expand([...packages]);
+  }
+
+  /**
   * Filters a given set of packages and returns all packages that match the scope glob
   * and do not match the ignore glob
   *

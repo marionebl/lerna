@@ -1,0 +1,8 @@
+{
+  "name": "package-6",
+  "description": "Leaf transitive dependent: [package-6] > package-5 > package-3 > package-1",
+  "version": "1.0.0",
+  "dependencies": {
+    "package-5": "1.0.0"
+  }
+}
