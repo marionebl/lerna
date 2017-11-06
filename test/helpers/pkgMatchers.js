@@ -1,4 +1,49 @@
+import fs from "fs";
+import os from "os";
+import readPkg from "read-pkg";
 import semver from "semver";
+
+import Package from "../../src/Package";
+
+const toPackage = (ref) => {
+  return ref instanceof Package
+    ? ref
+    : new Package(readPkg.sync(ref), ref);
+}
+
+const matchBinaryLinks = () => {
+  return (pkgRef, raw) => {
+    const pkg = toPackage(pkgRef);
+
+    const inputs = Array.isArray(raw) ? raw : [raw];
+
+    const links = os.platform() === "win32"
+      ? inputs.reduce((acc, input) => [...acc, input, [input, 'cmd'].join('.')])
+      : inputs;
+
+    const expectation = `expected ${pkg.name} to link to ${links.join(', ')}`;
+
+    const found = fs.readdirSync(pkg.binLocation);
+    const missing = links.filter(link => !found.includes(link));
+    const superfluous = found.filter(link => !links.includes(link));
+
+    if (missing.length > 0 || superfluous.length > 0) {
+      return {
+        message: [
+          expectation,
+          missing.length > 0 ? `missing: ${missing.join(', ')}` : '',
+          superfluous.length > 0 ? `superfluous: ${superfluous.join(', ')}` : ''
+        ].filter(Boolean).join(' '),
+        pass: false
+      };
+    }
+
+    return {
+      message: expectation,
+      pass: true
+    };
+  };
+};
 
 const matchDependency = dependencyType => {
   return (manifest, pkg, range) => {
@@ -46,5 +91,6 @@ const matchDependency = dependencyType => {
 
 export default {
   toDependOn: matchDependency('dependencies'),
-  toDevDependOn: matchDependency('devDependencies')
+  toDevDependOn: matchDependency('devDependencies'),
+  toBinaryLink: matchBinaryLinks()
 }

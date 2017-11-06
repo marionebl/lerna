@@ -10,12 +10,15 @@ import Repository from "../src/Repository";
 
 // helpers
 import initFixture from "./helpers/initFixture";
+import pkgMatchers from "./helpers/pkgMatchers";
 
 // file under test
 import PackageUtilities from "../src/PackageUtilities";
 
 // silence logs
 log.level = "silent";
+
+expect.extend(pkgMatchers);
 
 describe("PackageUtilities", () => {
   describe(".getPackages()", () => {
@@ -439,14 +442,11 @@ describe("PackageUtilities", () => {
 
     it("should create a link string bin entry", async (done) => {
       const testDir = await initFixture("PackageUtilities/links");
-      const srcRef = path.join(testDir, "packages/package-2");
-      const destRef = path.join(testDir, "packages/package-3");
-      const src = new Package(await readPkg(srcRef), srcRef);
-      const dest = new Package(await readPkg(destRef), destRef);
+      const src = path.join(testDir, "packages/package-2");
+      const dest = path.join(testDir, "packages/package-3");
 
       const cb = () => {
-        const links = fs.readdirSync(dest.binLocation);
-        expect(links).toEqual(['links-2']);
+        expect(dest).toBinaryLink('links-2');
         done();
       };
 
@@ -455,14 +455,11 @@ describe("PackageUtilities", () => {
 
     it("should create links for object bin entry", async (done) => {
       const testDir = await initFixture("PackageUtilities/links");
-      const srcRef = path.join(testDir, "packages/package-3");
-      const destRef = path.join(testDir, "packages/package-4");
-      const src = new Package(await readPkg(srcRef), srcRef);
-      const dest = new Package(await readPkg(destRef), destRef);
+      const src = path.join(testDir, "packages/package-3");
+      const dest = path.join(testDir, "packages/package-4");
 
       const cb = () => {
-        const links = fs.readdirSync(dest.binLocation);
-        expect(links).toEqual(['links3cli1', 'links3cli2']);
+        expect(dest).toBinaryLink(['links3cli1', 'links3cli2']);
         done();
       };
 
@@ -491,12 +488,10 @@ describe("PackageUtilities", () => {
       const testDir = await initFixture("PackageUtilities/links");
       const firstSrcRef = path.join(testDir, "packages/package-2");
       const secondSrcRef = path.join(testDir, "packages/package-3")
-      const destRef = path.join(testDir, "packages/package-4");
-      const dest = new Package(await readPkg(destRef), destRef);
+      const dest = path.join(testDir, "packages/package-4");
 
       const cb = () => {
-        const links = fs.readdirSync(dest.binLocation);
-        expect(links).toEqual(['links-2', 'links3cli1', 'links3cli2']);
+        expect(dest).toBinaryLink(['links-2', 'links3cli1', 'links3cli2']);
         done();
       };
 
