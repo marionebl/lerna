@@ -1,5 +1,4 @@
 import async from "async";
-import fs from "fs";
 import log from "npmlog";
 import path from "path";
 import readPkg from "read-pkg";
@@ -474,11 +473,6 @@ describe("PackageUtilities", () => {
       const cb = () => {
         expect(src).toHaveExecutable(['cli1.js', 'cli2.js'])
         done();
-        /* const cli1Mode = fs.statSync(path.join(src.location, 'cli1.js')).mode;
-        const cli2Mode = fs.statSync(path.join(src.location, 'cli2.js')).mode;
-        expect((cli1Mode & parseInt('777', 8)).toString(8)).toBe('755');
-        expect((cli2Mode & parseInt('777', 8)).toString(8)).toBe('755');
-        done(); */
       };
 
       PackageUtilities.createBinaryLink(src, dest, cb);

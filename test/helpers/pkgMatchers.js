@@ -25,8 +25,8 @@ const matchBinaryLinks = (options = {check: false}) => {
     const expectation = `expected ${pkg.name} to link to ${links.join(', ')}`;
 
     const found = fs.readdirSync(pkg.binLocation);
-    const missing = links.filter(link => !found.includes(link));
-    const superfluous = found.filter(link => !links.includes(link));
+    const missing = links.filter(link => found.indexOf(link) === -1);
+    const superfluous = found.filter(link => links.indexOf(link) === -1);
 
     if (missing.length > 0 || superfluous.length > 0) {
       return {
