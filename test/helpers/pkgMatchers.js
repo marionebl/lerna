@@ -21,6 +21,8 @@ const matchBinaryLinks = () => {
       ? inputs.reduce((acc, input) => [...acc, input, [input, 'cmd'].join('.')])
       : inputs;
 
+    console.log(links);
+
     const expectation = `expected ${pkg.name} to link to ${links.join(', ')}`;
 
     const found = fs.readdirSync(pkg.binLocation);
