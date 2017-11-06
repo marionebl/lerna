@@ -1,5 +1,6 @@
 import fs from "fs";
 import os from "os";
+import path from "path";
 import readPkg from "read-pkg";
 import semver from "semver";
 
@@ -11,7 +12,7 @@ const toPackage = (ref) => {
     : new Package(readPkg.sync(ref), ref);
 }
 
-const matchBinaryLinks = () => {
+const matchBinaryLinks = (options = {check: false}) => {
   return (pkgRef, raw) => {
     const pkg = toPackage(pkgRef);
 
@@ -36,6 +37,10 @@ const matchBinaryLinks = () => {
         ].filter(Boolean).join(' '),
         pass: false
       };
+    }
+
+    if (options.check) {
+
     }
 
     return {
@@ -89,8 +94,42 @@ const matchDependency = dependencyType => {
   }
 };
 
+const mactchExecutableFile = () => {
+  return (pkgRef, raw) => {
+    const files = Array.isArray(raw) ? raw : [raw];
+    const expectation = `expected ${files.join(', ')} to be executable`;
+
+    if (os.platform() === "win32") {
+      return {
+        message: `${expectation}, skipped check on win32`,
+        pass: true
+      };
+    }
+
+    const pkg = toPackage(pkgRef);
+
+    const failed = files.filter(file => {
+      const stats = fs.statSync(path.join(pkg.location, file));
+      return (stats.mode & parseInt("777", 8)).toString('8')[0] !== "7";
+    });
+
+    const pass = failed.length === 0;
+    const verb = failed.length > 1 ? 'were' : 'was';
+
+    const message = pass
+      ? expectation
+      : `${expectation} while ${failed.join(', ')} ${verb} found to be not executable.`
+
+    return {
+      message,
+      pass
+    };
+  };
+}
+
 export default {
   toDependOn: matchDependency('dependencies'),
   toDevDependOn: matchDependency('devDependencies'),
-  toBinaryLink: matchBinaryLinks()
+  toHaveExecutable: mactchExecutableFile(),
+  toHaveBinaryLink: matchBinaryLinks()
 }

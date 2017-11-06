@@ -446,7 +446,7 @@ describe("PackageUtilities", () => {
       const dest = path.join(testDir, "packages/package-3");
 
       const cb = () => {
-        expect(dest).toBinaryLink('links-2');
+        expect(dest).toHaveBinaryLink('links-2');
         done();
       };
 
@@ -459,7 +459,7 @@ describe("PackageUtilities", () => {
       const dest = path.join(testDir, "packages/package-4");
 
       const cb = () => {
-        expect(dest).toBinaryLink(['links3cli1', 'links3cli2']);
+        expect(dest).toHaveBinaryLink(['links3cli1', 'links3cli2']);
         done();
       };
 
@@ -468,17 +468,17 @@ describe("PackageUtilities", () => {
 
     it("should make links targets executable", async (done) => {
       const testDir = await initFixture("PackageUtilities/links");
-      const srcRef = path.join(testDir, "packages/package-3");
-      const destRef = path.join(testDir, "packages/package-4");
-      const src = new Package(await readPkg(srcRef), srcRef);
-      const dest = new Package(await readPkg(destRef), destRef);
+      const src = path.join(testDir, "packages/package-3");
+      const dest = path.join(testDir, "packages/package-4");
 
       const cb = () => {
-        const cli1Mode = fs.statSync(path.join(src.location, 'cli1.js')).mode;
+        expect(src).toHaveExecutable(['cli1.js', 'cli2.js'])
+        done();
+        /* const cli1Mode = fs.statSync(path.join(src.location, 'cli1.js')).mode;
         const cli2Mode = fs.statSync(path.join(src.location, 'cli2.js')).mode;
         expect((cli1Mode & parseInt('777', 8)).toString(8)).toBe('755');
         expect((cli2Mode & parseInt('777', 8)).toString(8)).toBe('755');
-        done();
+        done(); */
       };
 
       PackageUtilities.createBinaryLink(src, dest, cb);
@@ -491,7 +491,7 @@ describe("PackageUtilities", () => {
       const dest = path.join(testDir, "packages/package-4");
 
       const cb = () => {
-        expect(dest).toBinaryLink(['links-2', 'links3cli1', 'links3cli2']);
+        expect(dest).toHaveBinaryLink(['links-2', 'links3cli1', 'links3cli2']);
         done();
       };
 
