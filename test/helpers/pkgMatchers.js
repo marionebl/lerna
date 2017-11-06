@@ -18,10 +18,8 @@ const matchBinaryLinks = () => {
     const inputs = Array.isArray(raw) ? raw : [raw];
 
     const links = os.platform() === "win32"
-      ? inputs.reduce((acc, input) => [...acc, input, [input, 'cmd'].join('.')])
+      ? inputs.reduce((acc, input) => [...acc, input, [input, 'cmd'].join('.')], [])
       : inputs;
-
-    console.log(links);
 
     const expectation = `expected ${pkg.name} to link to ${links.join(', ')}`;
 
